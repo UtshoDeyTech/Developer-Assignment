@@ -11,7 +11,7 @@ import (
 
 var DB *gorm.DB
 
-func Connect(cfg config.Config) error {
+func Connect(cfg config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort,
@@ -19,11 +19,11 @@ func Connect(cfg config.Config) error {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
 	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`).Error; err != nil {
-		return fmt.Errorf("failed to enable uuid-ossp extension: %w", err)
+		return nil, fmt.Errorf("failed to enable uuid-ossp extension: %w", err)
 	}
 
 	if err := db.AutoMigrate(
@@ -33,11 +33,10 @@ func Connect(cfg config.Config) error {
 		&models.UserRole{},
 		&models.RolePermission{},
 	); err != nil {
-		return fmt.Errorf("auto migration failed: %w", err)
+		return nil, fmt.Errorf("auto migration failed: %w", err)
 	}
 
 	seedData(db)
 
-	DB = db
-	return nil
+	return db, nil
 }

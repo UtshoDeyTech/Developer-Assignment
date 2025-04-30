@@ -11,12 +11,12 @@ import (
 
 func main() {
 	cfg := config.LoadConfig()
-	err := database.Connect(cfg)
+	db, err := database.Connect(cfg)
 	if err != nil {
 		log.Fatalf("Initialization error: %v", err)
 	}
 
-	r := routes.SetupRouter()
+	r := routes.SetupRouter(db)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
