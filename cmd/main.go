@@ -1,12 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"os"
+
+	"github.com/tahsin005/affpilot-auth/internal/config"
+	"github.com/tahsin005/affpilot-auth/internal/database"
+	"github.com/tahsin005/affpilot-auth/internal/http/routes"
 )
 
 func main() {
-	fmt.Println("AffPilot Auth Service starting...")
-	fmt.Println("Hello Tahsin....")
-	log.Println("Server initialized")
+	cfg := config.LoadConfig()
+	err := database.Connect(cfg)
+	if err != nil {
+		log.Fatalf("Initialization error: %v", err)
+	}
+
+	r := routes.SetupRouter()
+
+	port := os.Getenv("SERVER_PORT")
+	if port == "" {
+		port = "8080"
+	}
+	r.Run(":" + port)
 }
