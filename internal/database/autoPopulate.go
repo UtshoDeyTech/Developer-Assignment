@@ -40,6 +40,11 @@ func seedData(db *gorm.DB) {
 		{Name: "user:promote:admin", Resource: "user", Action: "promote:admin", Description: "Promote to admin"},
 		{Name: "user:promote:moderator", Resource: "user", Action: "promote:moderator", Description: "Promote to moderator"},
 		{Name: "user:demote", Resource: "user", Action: "demote", Description: "Demote user"},
+		{Name: "content:create", Resource: "content", Action: "create", Description: "Create content"},
+		{Name: "content:read", Resource: "content", Action: "read", Description: "Read content"},
+		{Name: "content:update", Resource: "content", Action: "update", Description: "Update content"},
+		{Name: "content:delete", Resource: "content", Action: "delete", Description: "Delete content"},
+		{Name: "user:process:deletion", Resource: "user", Action: "process:deletion", Description: "Process user deletion requests"},
 	}
 	for _, perm := range permissions {
 		db.FirstOrCreate(&perm, models.Permission{Name: perm.Name})
@@ -61,12 +66,17 @@ func seedData(db *gorm.DB) {
 		"user:read:all", "user:create:all", "user:update:all", "user:delete:all",
 		"user:read:self", "user:update:self",
 		"role:read", "role:create", "role:update", "role:delete",
+		"permission:read", 
+		"user:promote:admin",
 		"user:promote:moderator", "user:demote",
+		"content:create", "content:read", "content:update", "content:delete",
+		"user:process:deletion",
 	})
 
 	assignPermissions(db, moderatorRole.ID, []string{
 		"user:read:all", "user:read:self", "user:update:self", "user:delete:self",
-		"user:promote:moderator", "user:demote",
+		"content:create", "content:read", "content:update", "content:delete",
+		"user:process:deletion",
 	})
 
 	assignPermissions(db, userRole.ID, []string{
@@ -103,7 +113,7 @@ func seedData(db *gorm.DB) {
 		})
 		log.Println("System admin user created and assigned role.")
 	} else {
-		log.Println("ℹSystem admin user already exists.")
+		log.Println("System admin user already exists.")
 	}
 
 	log.Println("Seed data inserted successfully")
