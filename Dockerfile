@@ -1,11 +1,14 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.24.2-alpine as builder
+
+RUN apk --no-cache add ca-certificates tzdata
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
+COPY go.mod go.sum ./
 
 RUN go mod download
+
+RUN go mod tidy
 
 COPY . .
 
@@ -13,13 +16,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/main.g
 
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
 COPY --from=builder /app/main .
-COPY --from=builder /app/.env.example .env
+
+ENTRYPOINT ["./main"]
 
 EXPOSE 8080
-
-CMD ["./main"]
